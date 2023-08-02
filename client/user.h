@@ -43,6 +43,7 @@ typedef struct user{
 	*/
 }USER;
 
+bool create_or_login(USER* ,char* );//选择创建或登录
 void writ_neus_to_fi(USER* );//write the new user to the file
 void Allocation_ID(USER* , char* ); //分配未被占用的ID,原理：找到目前最大的ID，加一赋值
 void add_user(HEAD* );//添加用户

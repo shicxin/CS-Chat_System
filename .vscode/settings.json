@@ -1,6 +1,6 @@
 {
-    "files.associations": {
-        "init.h": "c",
-        "user.h": "c"
-    }
+	"files.associations": {
+		"init.h": "c",
+		"user.h": "c"
+	}
 }

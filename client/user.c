@@ -5,6 +5,36 @@
 #include <sys/stat.h>
 #include "user.h"
 
+bool create_or_login(USER* x, char* c)
+{
+	if(c[0] == '1')
+	{
+		USER x;
+		printf("请输入用户名:\t");
+		scanf("%s", x.name);
+		bool k = 1;
+		while(k)
+		{
+			char pas[CHAR_SIZE];
+			printf("请输密码:\t");
+			scanf("%s", x.pasw);
+			printf("请确认密码:\t");
+			scanf("%s", pas);
+			if(strcmp(pas, x.pasw) == 0) k = 0;
+			else puts("two different passwords");
+		}
+		//发送到服务器
+
+		//接收服务器是否创建成功的消息
+		// int flag = 
+	}
+	if(c[0] == '0')
+	{
+		//登录
+	}
+	//返回是否登录成功
+}
+
 void add_user(HEAD* head)
 {
 	char name[CHAR_SIZE], pasw[CHAR_SIZE], password[CHAR_SIZE], id[CHAR_SIZE];

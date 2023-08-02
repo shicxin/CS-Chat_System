@@ -4,6 +4,11 @@
 #include <string.h>
 #include "init.h"
 
+void Welcome_Screen()
+{
+	puts("welcome to cs-chat-system");
+}
+
 void init_file()
 {
 	if(access("./data", F_OK) != 0)//判断数据文件夹是否存在
