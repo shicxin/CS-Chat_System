@@ -14,10 +14,13 @@
 #define WHERE_SIZE 50
 #endif // __CHARSIZE__
 
+/*************clion*******************/
 void tell_server_to_signal(int);//告诉服务器信号
 void tell_server_message(void*, int);//告诉服务器消息
 // tell_the_server_to_();//告诉服务器
 
+
+/*************server*******************/
 void tell_client_signal();
 
 #endif // __TELL__

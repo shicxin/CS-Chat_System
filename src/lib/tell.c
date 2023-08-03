@@ -1,10 +1,10 @@
 #include "tell.h"
 
-void tell_server_to_signal(int sig)
+int tell_server_to_signal(int sig)
 {
     int sock;
     struct sockaddr_in serv_addr;
-    char message[1];
+    char message[] = {"0123456789"};;
     sock = socket(PF_INET, SOCK_STREAM, 0);
     if(sock == -1) 
     {
@@ -20,9 +20,9 @@ void tell_server_to_signal(int sig)
         puts("connect error!");
         exit(1);
     }
-    write(sock, message, 1);
+    write(sock, message[sig], 1);
     close(sock);
-    return message[0] - '0';
+    return message[sig] - '0';
 }
  
 void tell_client_signal()

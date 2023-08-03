@@ -1,13 +1,14 @@
 #include <stdio.h>
-#include "user.h"
-#include "init.h"
-#include "tell.h"
+#include "../lib/user.h"
+#include "../lib/init.h"
+#include "../lib/tell.h"
 
 int main(int argc, char** argv)
 {
 	Welcome_Screen();
 	USER x;
 	bool k = 1;
+	int flag = 11;
 	while(k)
 	{
 		puts("你想要执行什么操作：（登录0、注册1、其余任意键退出）");
@@ -18,7 +19,11 @@ int main(int argc, char** argv)
 			k = 0;
 			continue;
 		}
-		bool x = create_or_login(x, c);
+		flag = create_or_login(&x, c);
+	}
+	while(flag < 11 && flag >= 0)
+	{
+		puts("登录功能");
 	}
 	return 0;
 }
