@@ -4,8 +4,9 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 #include "user.h"
+#include "tell.h"
 
-bool create_or_login(USER* x, char* c)
+bool create_or_login(USER* x, char* c) 
 {
 	if(c[0] == '1')
 	{
@@ -22,15 +23,28 @@ bool create_or_login(USER* x, char* c)
 			scanf("%s", pas);
 			if(strcmp(pas, x.pasw) == 0) k = 0;
 			else puts("two different passwords");
-		}
+			
 		//发送到服务器
-
+			tell_server_signal(0);//注册信号
 		//接收服务器是否创建成功的消息
 		// int flag = 
+		}
 	}
 	if(c[0] == '0')
 	{
-		//登录
+		USER x;
+		printf("请输入用户名:\t");
+		scanf("%s", x.name);
+		printf("请输密码:\t");
+		scanf("%s", x.pasw);
+			
+		//发送到服务器
+		char c[2] = "1\0";
+		tell_ser((void*)&c, sizeof(c));//登录信号
+		// tell_server_message((void*)&x, sizeof(USER));
+		//接收服务器是否创建成功的消息
+		if(x.ID != "")
+		{}
 	}
 	//返回是否登录成功
 }

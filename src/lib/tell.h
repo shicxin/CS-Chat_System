@@ -14,13 +14,18 @@
 #define WHERE_SIZE 50
 #endif // __CHARSIZE__
 
+
+#define PORT_log 8888
+
 /*************clion*******************/
-void tell_server_to_signal(int);//告诉服务器信号
-void tell_server_message(void*, int);//告诉服务器消息
-// tell_the_server_to_();//告诉服务器
+int tell_server_signal(int);//告诉服务器信号
+void tell_server_message(void*, long long siz);//告诉服务器消息
+void tell_ser(void* message, long long siz);
+// tell_the_server_();//告诉服务器
+
 
 
 /*************server*******************/
-void tell_client_signal();
-
+int tell_client_signal();//告诉客户端信号
+void tell_ser(void* message, long long siz);
 #endif // __TELL__

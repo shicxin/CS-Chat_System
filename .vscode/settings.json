@@ -2,6 +2,8 @@
 	"files.associations": {
 		"init.h": "c",
 		"user.h": "c",
-		"tell.h": "c"
+		"tell.h": "c",
+		"socket.h": "c",
+		"unistd.h": "c"
 	}
 }
