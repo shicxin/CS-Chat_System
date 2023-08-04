@@ -1,10 +1,13 @@
 #include "tell.h"
+#include "user.h"
+#include "cJSON.h"
 
-int tell_server_signal(int sig)
+/// @brief 创建与服务器连接的套接字
+/// @return 套接字
+int call_ser()
 {
     int sock;
     struct sockaddr_in serv_addr;
-    char message[] = {"0123456789"};;
     sock = socket(PF_INET, SOCK_STREAM, 0);
     if(sock == -1) 
     {
@@ -13,123 +16,82 @@ int tell_server_signal(int sig)
     }
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT_log);
+    // serv_addr.sin_port = htons(PORT_log);
+    printf("监听端口为：");
+    int port;
+    scanf("%d", &port);
+    serv_addr.sin_port = htons(port);
     serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
     {
         puts("connect error!");
         exit(1);
     }
-    write(sock, &message[sig], 1);
-    close(sock);
-    return message[sig] - '0';
+    return sock;
 }
- 
-int tell_client_signal()
+
+/// @brief 服务器等待客户端的连接
+/// @param ser_sock 服务端套接字，用于监听端口，同时保存完成三次握手的客户端信息
+/// @param cln_addr 
+/// @return 与客户端连接的套接字
+int wait_cln(int* ser_sock, struct sockaddr_in cln_addr)
 {
-    int ser_sock, cln_sock;
-    struct sockaddr_in ser_addr, cln_addr;
-    char message[] = "0123456789";
-    ser_sock = socket(PF_INET, SOCK_STREAM, 0);
-    if(ser_sock == -1) 
-    {
-        puts("socket error!");
-        exit(1);
-    }
-    memset(&ser_addr, 0, sizeof(ser_addr));
-    ser_addr.sin_family = AF_INET;
-    ser_addr.sin_port = htons(PORT_log);
-    ser_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if(bind(ser_sock, (struct sockaddr*)&ser_addr, sizeof(ser_addr)) == -1)
-    {
-        puts("bind error!");
-        exit(1);
-    }
-    if(listen(ser_sock, 1) == -1)
-    {
-        puts("listen error!");
-        exit(1);
-    }
+    int sock;
     socklen_t cln_addr_size = sizeof(cln_addr);
-    cln_sock = accept(ser_sock, (struct sockaddr *)&cln_addr, &cln_addr_size);
-    if(cln_sock == -1)
+    sock = accept(*ser_sock, (struct sockaddr *)&cln_addr, &cln_addr_size);
+    if(sock == -1)
     {
         puts("accept error!");
         exit(1);
     }
-    char c;
-    read(cln_sock, &c, 1);
-    write(cln_sock, &message[c - '0'], 1);
-    close(ser_sock);
-    close(cln_sock);
+    return sock;
 }
 
-void tell_server_message(void* message, long long siz)
+/// @brief 将发给服务器的信号转换为json格式的字符串
+/// @param signal 信号，包含做什么、下次接收内容长度、以及一个时间戳
+/// @return json格式的字符串
+char* signal_to_json(SIG* signal)
 {
-    int sock;
-    struct sockaddr_in serv_addr;
+    cJSON* js = cJSON_CreateObject();
+    cJSON_AddNumberToObject(js, "DO", signal->DO);
+    cJSON_AddNumberToObject(js, "len", signal->len);
+    cJSON_AddNumberToObject(js, "tim", signal->tim);
+    return cJSON_Print(js);
 }
 
-void tell_ser(void* message, long long siz)
+/// @brief 将发来的json格式字符串转换为一个信号
+/// @param signal 信号
+/// @param message 返回字符串
+void json_to_signal(SIG* signal, char* message)
 {
-    int sock;
-    struct sockaddr_in serv_addr;
-    // char message[] = {"0123456789"};;
-    sock = socket(PF_INET, SOCK_STREAM, 0);
-    if(sock == -1) 
-    {
-        puts("socket error!");
-        exit(1);
-    }
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT_log);
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
-    {
-        puts("connect error!");
-        exit(1);
-    }
-    write(sock, &message, siz);
-    close(sock);
-    // return message[sig] - '0';
+    cJSON* js = cJSON_Parse(message);
+    cJSON* DO = cJSON_GetObjectItem(js, "DO");
+    cJSON* len = cJSON_GetObjectItem(js, "len");
+    cJSON* tim = cJSON_GetObjectItem(js, "tim");
 }
 
-int tell_cln()
+/// @brief 将发给服务器的用户节点转换为json格式的字符串
+/// @param user 用户节点
+/// @return json格式的字符串
+char* user_to_json(USER* user)
 {
-    int ser_sock, cln_sock;
-    struct sockaddr_in ser_addr, cln_addr;
-    char message[100];// = "0123456789";
-    ser_sock = socket(PF_INET, SOCK_STREAM, 0);
-    if(ser_sock == -1) 
-    {
-        puts("socket error!");
-        exit(1);
-    }
-    memset(&ser_addr, 0, sizeof(ser_addr));
-    ser_addr.sin_family = AF_INET;
-    ser_addr.sin_port = htons(PORT_log);
-    ser_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if(bind(ser_sock, (struct sockaddr*)&ser_addr, sizeof(ser_addr)) == -1)
-    {
-        puts("bind error!");
-        exit(1);
-    }
-    if(listen(ser_sock, 1) == -1)
-    {
-        puts("listen error!");
-        exit(1);
-    }
-    socklen_t cln_addr_size = sizeof(cln_addr);
-    cln_sock = accept(ser_sock, (struct sockaddr *)&cln_addr, &cln_addr_size);
-    if(cln_sock == -1)
-    {
-        puts("accept error!");
-        exit(1);
-    }
-    char c;
-    read(cln_sock, &c, 1);
-    write(cln_sock, &message[c - '0'], 1);
-    close(ser_sock);
-    close(cln_sock);
+    cJSON* js = cJSON_CreateObject();
+    cJSON_AddStringToObject(js, "ID", user->ID);
+    cJSON_AddStringToObject(js, "name", user->name);
+    cJSON_AddStringToObject(js, "pasw", user->pasw);
+    return cJSON_Print(js);
+}
+
+/// @brief 将接收到的json格式的字符串转化为用户信息
+/// @param user 
+/// @param message 
+void json_to_user(USER* user, char* message)
+{
+    cJSON* js = cJSON_Parse(message);
+    cJSON *ID = cJSON_GetObjectItem(js, "ID");
+    cJSON *name = cJSON_GetObjectItem(js, "name");
+    cJSON *pasw = cJSON_GetObjectItem(js, "pasw");
+    strcpy(user->ID, ID->valuestring);
+    strcpy(user->name, name->valuestring);
+    strcpy(user->pasw, pasw->valuestring);
 }

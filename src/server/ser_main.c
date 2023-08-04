@@ -19,46 +19,41 @@ int main(int argc, char** argv)
 	HEAD head;
 	init_ser_file();
 	init_ser_sys(&head);
-	int sig = 10;
-	// pid_t pid;
-	while(sig >= 0 && sig <= 10)
-	{
-		sig = tell_client_signal();//接收信号
-		// switch (sig)
-		// {
-		// case 0:
-		// 	puts("有客户端注册！");
-		// 	pid = fork();
-		// 	break;
-		// default:
-		// 	puts("接收到的消息不合法");
-		// 	break;
-		// }
-		// if(pid<0)break;
-	}
-	//子进程内容
-	// if(pid<0)
-	// {
-	// 	puts("进入子进程");
-	// 	switch (sig)
-	// 	{
-	// 	case 0:
-	// 		puts("注册进程启动");
-	// 		pid = fork();
-	// 		break;
-	// 	case 1:
-	// 		puts("有客户端登录！");
-	// 		pid = fork();
-	// 		break;
-	// 	default:
-	// 		puts("接收到的消息不合法");
-	// 		break;
-	// 	}
-	// }
-	// else 
-	// {
-	// 	puts("服务端崩溃！");
-	// }
-	// add_user(&head);
+	//开始监听端口
+	int ser_sock, cln_sock[30];
+    struct sockaddr_in ser_addr, cln_addr;
+    ser_sock = socket(PF_INET, SOCK_STREAM, 0);
+    if(ser_sock == -1) 
+    {
+        puts("socket error!");
+        exit(1);
+    }
+    memset(&ser_addr, 0, sizeof(ser_addr));
+    ser_addr.sin_family = AF_INET;
+    // ser_addr.sin_port = htons(PORT_log);
+    printf("监听端口为：");
+    int port;
+    scanf("%d", &port);
+    ser_addr.sin_port = htons(port);
+    ser_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if(bind(ser_sock, (struct sockaddr*)&ser_addr, sizeof(ser_addr)) == -1)
+    {
+        puts("bind error!");
+        exit(1);
+    }
+    if(listen(ser_sock, 30) == -1)
+    {
+        puts("listen error!");
+        exit(1);
+    }
+	int i = 0;
+	cln_sock[0] = wait_cln(&ser_sock, cln_addr);
+	char message[11];
+	read(cln_sock[0], message, sizeof(message));
+	puts(message);
+	strcpy(message, "hello_cln");
+	write(cln_sock[0], message, sizeof(message) - 1);
+	close(cln_sock[0]);
+    close(ser_sock);
 	return 0;
 }

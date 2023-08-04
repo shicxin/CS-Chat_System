@@ -46,10 +46,10 @@ typedef struct user{
 
 
 /************************server******************************/
-bool create_or_login(USER* ,char* );//选择创建或登录
+bool create_or_login(USER* ,int* );//选择创建或登录
 void writ_neus_to_fi(USER* );//将新用户写入文件
 void Allocation_ID(USER* , char* ); //分配未被占用的ID,原理：找到目前最大的ID，加一赋值
-void add_user(HEAD* );//添加用户
+void add_user(HEAD* , USER*);//添加用户
 USER* create_user(char* , char* , char* ) ;//创建用户
 USER* find_user(USER* );//找用户，找到返回指向该用户节点的指针，否则返回NULL；
 USER* logout_user(USER* );//删除用户，参数为指向要删除的用户节点的节点地址，返回删除用户所指的用户的内存节点节点

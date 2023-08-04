@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <unistd.h>
 #include "../lib/user.h"
 #include "../lib/init.h"
+#include "../lib/tell.h"
 
 #define PUT_OK 0
 
@@ -16,26 +18,24 @@ int main(int argc, char** argv)
 		printf("\n");
 	}
 	Welcome_Screen();
-	USER x;
-	bool k = 1;
-	int flag = 11;
+	USER x;//保存当前用户信息
+	bool k = 0;
+	int sock;
+	sock = call_ser();
+	if(sock < 0) puts("服务器开小差了，请联系管理员");
+	else k = 1;
 	while(k)
 	{
-		puts("你想要执行什么操作：（登录0、注册1、其余任意键退出）");
-		char c[2];
-		scanf("%s", c);
-		int key = atoi(&c[0]);
-		printf("%d\n", key);
-		if(key != 0 && key != 1) 
-		{
-			k = 0;
-			continue;
-		}
-		flag = create_or_login(&x, c);
+		if(create_or_login(&x, &sock) == 0) k = 0;
 	}
-	while(flag < 11 && flag >= 0)
+	int q = 1;
+	while(q)
 	{
-		puts("登录功能");
+		write(sock, "hello_ser", 10);
+		char message[100];
+		read(sock, message, 10);
+		puts(message);
+		break;
 	}
 	return 0;
 }
