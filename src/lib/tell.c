@@ -68,6 +68,9 @@ void json_to_signal(SIG* signal, char* message)
     cJSON* DO = cJSON_GetObjectItem(js, "DO");
     cJSON* len = cJSON_GetObjectItem(js, "len");
     cJSON* tim = cJSON_GetObjectItem(js, "tim");
+    signal->DO = DO->valueint;
+    signal->len = len->valueint;
+    signal->tim = tim->valueint;
 }
 
 /// @brief 将发给服务器的用户节点转换为json格式的字符串

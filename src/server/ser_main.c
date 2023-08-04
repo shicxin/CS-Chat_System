@@ -48,11 +48,22 @@ int main(int argc, char** argv)
     }
 	int i = 0;
 	cln_sock[0] = wait_cln(&ser_sock, cln_addr);
-	char message[11];
-	read(cln_sock[0], message, sizeof(message));
-	puts(message);
-	strcpy(message, "hello_cln");
-	write(cln_sock[0], message, sizeof(message) - 1);
+	char* message = (char*)malloc(50 * sizeof(char));
+	read(cln_sock[0], message, 44);
+	printf("%s\n", message);
+	// strcpy(message, "hello_cln");
+	// write(cln_sock[0], message, sizeof(message) - 1);
+	cJSON* js = cJSON_CreateObject();
+	SIG sig;
+	json_to_signal(&sig, message);
+	printf("DO:%d, len:%d, time:%d\n\n\n", sig.DO, sig.len, sig.tim);
+	free(message);
+	message = (char*)malloc(sizeof(char) * sig.len);
+	read(cln_sock[0], message, sig.len);
+	printf("%s\n", message);
+	USER* x = (USER*) malloc(sizeof(USER));
+	// json_to_user(x, message);
+	// printf("\n\nID:%s, name:%s, pasw:%s\n\n;", x->ID, x->name, x->pasw);
 	close(cln_sock[0]);
     close(ser_sock);
 	return 0;

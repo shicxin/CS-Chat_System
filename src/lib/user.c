@@ -12,12 +12,13 @@
 /// @return 
 bool create_or_login(USER* x, int* sock) 
 {
+	memset(x, 0, sizeof(USER));
 	puts("你想要执行什么操作：（登录0、注册1、其余任意键无效）");
 	char c[2];
 	memset(c, 0, sizeof(c));
 	scanf("%s", c);
 	int sig = atoi(&c[0]);
-	printf("%d\n", sig);
+	// printf("%d\n", sig);
 	printf("请输入用户名:\t");
 	scanf("%s", x->name);
 	if(sig == 1)
@@ -43,7 +44,18 @@ bool create_or_login(USER* x, int* sock)
 		puts(c);
 		// tell_ser((void*) x, sizeof(x));//告诉节点信息
 	}
-	
+	char* message = user_to_json(x);
+	SIG signal;
+	signal.DO = sig;
+	signal.len = strlen(message);
+	signal.tim = time(NULL);
+	char* js = signal_to_json(&signal);
+	write(*sock, js, strlen(js));
+	write(*sock, message, strlen(message) + 1);
+	printf("本次信号长度为%ld字节\n", strlen(js));
+	printf("本次信号长度为%ld字节\n", strlen(message));
+	free(message);
+	free(js);
 	//根据sig创建一个信号
 	// char* js = signal_to_json()
 	// cell_ser(js, sizeof());//发送注册信号
