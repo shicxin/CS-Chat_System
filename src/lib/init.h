@@ -1,16 +1,24 @@
-#if !defined(__INIT__)
-#define __INIT__
+#if !defined(__INIT___)
+#define __INIT___
 
-#include<stdbool.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+
+
+#include "cJSON.h"
+#include "mycjson.h"
 #include "user.h"
+#include "tell.h"
 
-/*************server*******************/
-void init_ser_file();//检查服务器文件是否存在
-void init_ser_sys(HEAD* );//初始化系统设置
+#define WHERE_SIZE 50
 
-/*************clion*******************/
-void Welcome_Screen();
-void init_cln_file();
-void init_cln_sys();
+void init_ser_file();//初始化文件
+// void init_user_and_file();//初始化系统链表中的用户与其文件
 
-#endif // __INIT__
+#endif // __INIT___
+ 

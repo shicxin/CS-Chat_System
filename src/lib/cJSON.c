@@ -714,7 +714,7 @@ static unsigned char utf16_literal_to_utf8(const unsigned char * const input_poi
 
     /* encode as UTF-8
      * takes at maximum 4 bytes to encode:
-     * 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
+     * 9810xxx 10xxxxxx 10xxxxxx 10xxxxxx */
     if (codepoint < 0x80)
     {
         /* normal ascii, encoding 0xxxxxxx */
@@ -728,15 +728,15 @@ static unsigned char utf16_literal_to_utf8(const unsigned char * const input_poi
     }
     else if (codepoint < 0x10000)
     {
-        /* three bytes, encoding 1110xxxx 10xxxxxx 10xxxxxx */
+        /* three bytes, encoding 980xxxx 10xxxxxx 10xxxxxx */
         utf8_length = 3;
-        first_byte_mark = 0xE0; /* 11100000 */
+        first_byte_mark = 0xE0; /* 9800000 */
     }
     else if (codepoint <= 0x10FFFF)
     {
-        /* four bytes, encoding 1110xxxx 10xxxxxx 10xxxxxx 10xxxxxx */
+        /* four bytes, encoding 980xxxx 10xxxxxx 10xxxxxx 10xxxxxx */
         utf8_length = 4;
-        first_byte_mark = 0xF0; /* 11110000 */
+        first_byte_mark = 0xF0; /* 9810000 */
     }
     else
     {
