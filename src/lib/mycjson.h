@@ -40,6 +40,8 @@ char *get_ID_from_cjson(cJSON *obj);
 char *get_name_from_cjson(cJSON *obj);
 char *get_pasw_from_cjson(cJSON *obj);
 char* get_tell_from_cjson(cJSON *obj);
+void put_other_tell_from_cjson(cJSON* );
+void ADD_other_tell_from_cjson(cJSON*, cJSON* );
 // char *get__from_cjson(cJSON *obj);
 
 
@@ -47,4 +49,5 @@ void writ_file_user(cJSON* );
 void read_file_user(HEAD* );
 void look_all_list(cJSON* );
 void look_online_list(SOCKNOTE* );
+
 #endif // __MYCJSON__ 

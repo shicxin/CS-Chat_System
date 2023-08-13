@@ -16,6 +16,7 @@ void manage_user(int red_fd, int wrt_fd)
     head.onli_us = NULL;
     // int fd = open(USER_MANAGE_FIRE, O_RDWR);
     puts("子进程打开管道，等待接收维护请求");
+    read_file_user(&head);
     cJSON *json;
     SOCKNOTE* user;
     int DO;
@@ -24,6 +25,7 @@ void manage_user(int red_fd, int wrt_fd)
     {
         puts("子进程收到消息：");
         read_DO_message(red_fd, &DO, &json);
+
         if(DO == 10)
         {
             json->next = head.all_us;
@@ -31,24 +33,31 @@ void manage_user(int red_fd, int wrt_fd)
             char str[USER_ID_SIZE];
             sprintf(str, "%ld", time(NULL)%10000 + time(NULL)/10000);
             cJSON_AddStringToObject(json, "ID", str);
+            cJSON_AddItemToObject(json, "other_tell", cJSON_CreateObject());
             DO = 98;
+            writ_file_user(head.all_us);
         }
         else if(DO == 11)
         {
             user = (SOCKNOTE*) malloc (sizeof(SOCKNOTE));
-            puts("接收套接字！");
-            user->sock = recv_fd(red_fd);///???????????????????///////////??????????????????
-    cJSON* messa = cJSON_CreateObject();
-    cJSON_AddStringToObject(messa, "message", "客户端你好, 我是用户管理进程！！\0");
-    talk_DO_message(user->sock, 55,messa);
-    cJSON_Delete(messa);
-            puts("准备找人");
+            if(PUT_OK) puts("接收套接字！");
+            user->sock = recv_fd(red_fd);
+            if(PUT_OK) 
+            {
+                cJSON* messa = cJSON_CreateObject();
+                cJSON_AddStringToObject(messa, "message", "客户端你好, 我是用户管理进程！！\0");
+                talk_DO_message(user->sock, 55,messa);
+                cJSON_Delete(messa);
+            }
+            if(PUT_OK) puts("准备找人");
             cJSON* tmp = find_user_all(head.all_us, json);
             if(tmp != NULL && strcmp(get_pasw_from_cjson(tmp), get_pasw_from_cjson(json)) == 0)
             {
+                cJSON_AddStringToObject(json, "name", get_name_from_cjson(tmp));
                 user->user = cJSON_Duplicate(json, 1);
                 user->next = head.onli_us;
                 head.onli_us = user;
+                cJSON_AddItemToObject (json, "other_tell", cJSON_GetObjectItem(tmp, "other_tell"));
                 DO = 98;
                 // puts("告诉所有人有人登录！");
                 // tell_all(33, head.onli_us, json);
@@ -62,46 +71,64 @@ void manage_user(int red_fd, int wrt_fd)
         }
         else if(DO == 31)
         {
-            puts("子进程准备发送中····················");
-    char* tmp = cJSON_Print(json);
-    puts(tmp);
-    free(tmp);
+            puts("开始转发！");
+            if(PUT_OK) 
+            {
+                puts("子进程准备发送中····················");
+                char* tmp = cJSON_Print(json);
+                puts(tmp);
+                free(tmp);
+            }
             SOCKNOTE* tep = find_user_online(head.onli_us, json);
-            if(tep == NULL) puts("？？？？？？？？？？user为空？？？？？？？？？？");
-            // char* tem = cJSON_Print(user);
+            // if(tep == NULL) puts("？？？？？？？？？？user为空？？？？？？？？？？");
+            // else puts("找到了");
+            // char* tem = cJSON_Print(tep->user);
             // puts(tem);
             // free(tem);
             if(tep != NULL)
             {
-                printf("准备给%s发送内容%s，套接字为%d", get_ID_from_cjson(tep->user), get_message_from_cjson(json), get_sock_from_cjson(tep->user));
-                puts("子进程转发消息中··············：");
-                DO = 97;
-                talk_DO_message(tep->sock, DO, tep->user);
+                printf("%s准备给%s发送内容%s，套接字为%d\n",get_name_from_cjson(tep->user), get_ID_from_cjson(tep->user), get_message_from_cjson(json), tep->sock);
+                // puts("子进程转发消息中··············：");
+                // cJSON_AddNumberToObject(tep->user, "int", 5876);
+                talk_DO_message(tep->sock, 97, json);
+                DO = 98;
             }
             else 
             {
-                ///暂存
-                puts("用户未上线");
+                cJSON_AddStringToObject(json, "ID", get_who_from_cjson(json));
+                cJSON* tp = find_user_all(head.all_us, json);
+                DO = 96;
+                if(tp == NULL) DO = 99;
+                cJSON* tmp = cJSON_CreateObject();
+                cJSON_AddNumberToObject(tmp, "time", time(NULL));
+                cJSON_AddStringToObject(tmp, "tell", get_tell_from_cjson(json));
+                cJSON_AddStringToObject(tmp, "message", get_message_from_cjson(json));
+                ADD_other_tell_obj(json, head.all_us, tmp);
+                writ_file_user(head.all_us);
             }
         }
         else if(DO == 32)
         {
-            DO = 31;
             // cJSON* user = head.onli_us;
-            tell_all(DO, head.onli_us, json);
-            DO = 98;
-            puts("返回消息");
-            talk_DO_message(get_sock_from_cjson(json), DO, json);
+            tell_all(97, head.onli_us, json);
+            
+            talk_DO_message(get_sock_from_cjson(json), 98, json);
             // cjson
             // while()?????????????????????????????????????????????
         }
-    puts("子进程发的消息：");
+    if(PUT_OK) puts("子进程发的消息：");
+    cJSON_AddNumberToObject(json, "int", 9675);
     talk_DO_message(wrt_fd, DO, json);
-    puts("全部用户链表：");
-    look_all_list(head.all_us);
-    puts("在线用户链表：");
-    look_online_list(head.onli_us);
-        // writ_file_user(head.all_us);
+            // printf("%d\n",DO);
+            // char* tem = cJSON_Print(json);
+            // puts(tem);
+            // free(tem);
+    // if(PUT_OK) puts("全部用户链表：");
+    // look_all_list(head.all_us);
+    // if(PUT_OK)
+    //  puts("在线用户链表：");
+    // look_online_list(head.onli_us);
+        writ_file_user(head.all_us);
     }
 }
 
@@ -122,7 +149,7 @@ void Client_functionality (int sock, int wrt_fd, int red_fd)
     //进入程序功能
     while(k2)
     {
-        puts("可以接收信息了");
+        if(PUT_OK) puts("可以接收信息了");
         forward_message(sock, wrt_fd, red_fd);
     }
 }
@@ -139,25 +166,21 @@ bool Login_registered( int sock, int wrt_fd, int read_fd)
     char* message = (char*) malloc (sizeof(char) * HEADER_SIZE + 1);
     int DO;
     cJSON* x;
-    puts("收到：");
+    if(PUT_OK) puts("收到：");
     read_DO_message(sock, &DO, &x);
-    if(DO == 11) 
-    {
-        cJSON_AddNumberToObject(x, "sock", sock);
-    }
     int sig = DO;
     free(message);
     message = (char*)malloc(sizeof(*message) * HEADER_SIZE);
     // printf("套接字为%d", sock);
-    puts("发给子进程：");
+    if(PUT_OK) puts("发给子进程：");
     talk_DO_message(wrt_fd, DO, x);
     if(DO == 11) 
     {
         send_fd(wrt_fd, sock);
     }
-    puts("接收的消息");
+    if(PUT_OK) puts("接收的消息");
     read_DO_message(read_fd, &DO, &x);
-    puts("发给客户端：");
+    if(PUT_OK) puts("发给客户端：");
     talk_DO_message(sock, DO, x);
     if(sig == 11 && DO == 98) check = 1;
     return check;
@@ -166,7 +189,7 @@ bool Login_registered( int sock, int wrt_fd, int read_fd)
 /// @brief 客户端登录注册界面
 /// @param head 系统头结点
 /// @return 是否登录成功
-bool log_or_reg(cJSON* cln, int sock)
+bool log_or_reg(cJSON** cln, int sock)
 {
     cJSON* user = cJSON_CreateObject();
     puts("你想要执行什么操作：（登录0、注册1、其余任意键无效）");
@@ -208,16 +231,18 @@ bool log_or_reg(cJSON* cln, int sock)
         cJSON_AddStringToObject(user, "pasw", pas);
 	}
     int DO = sig;
-    puts("发客户端：");
+    if(PUT_OK) puts("发客户端：");
     talk_DO_message(sock, sig, user);
+    if(PUT_OK) 
     if(DO == 11)
     {
-        puts("管理进程发：");
-        read_DO_message(sock, &sig, &cln);
+        if(PUT_OK) puts("管理进程发：");
+        read_DO_message(sock, &sig, cln);
     }
-    puts("客户端收：");
-    read_DO_message(sock, &sig, &cln);
-    printf("DO = %d, sig = %d\n",DO, sig);
+    if(PUT_OK) puts("客户端收：");
+    read_DO_message(sock, &sig, cln);
+    // printf("DO = %d, sig = %d\n",DO, sig);
+    printf("你的ID是  %s  ，这是你在服务器中的唯一凭证\n",get_ID_from_cjson(*cln));
     if(sig == 98 && DO == 10)
     {
         puts("注册成功！");
@@ -242,19 +267,17 @@ void lis_ser(int sock)
     while(1)
     {
         read_DO_message(sock, &DO, &json);
-char* tep = cJSON_Print(json);
-puts(tep);
-free(tep);
-        if(DO == 98) puts("发送成功！");
-        if(DO == 99) puts("对方不在线！已暂存");
+                char* teep = cJSON_Print(json);
+                printf("!!%d\n", DO);
+                puts(teep);
+        if(DO == 96) puts("用户未上线，消息已暂存！\n");
         if(DO == 97) 
         {
-            char* who = get_who_from_cjson(json);
-            char* message = get_message_from_cjson(json);
-            printf("%s发给你%s", who, message);
-            cJSON_Delete(json);
+            printf("%s发给你%s\n", get_tell_from_cjson(json), get_message_from_cjson(json));
         }
-        if(DO == 33) puts("有好友上线！");
+        if(DO == 98) puts("发送成功！\n");
+        if(DO == 99) puts("没有这个用户\n");
+        if(DO == 33) puts("有好友上线！\n");
     }
 }
 
@@ -264,24 +287,21 @@ void talk_who(cJSON* user)
 {
     while(1)
     {
-        puts("你想和谁聊天：\n（6个6为所有人）\b\b\b\b\b\b\b\b\b\b\b");
+        int DO = 31;
+        puts("你想和谁聊天：\n（6个6为所有人）");
         char ID[CHAR_SIZE];
         scanf("%s", ID);
         puts("你要发的消息是：");
         char* message = (char*) malloc(sizeof(char) * 1000000);
         scanf("%s", message);
         puts("转发中······");
-        int DO = 31;
         if(strcmp(ID, "666666") == 0) DO = 32;
         cJSON* json = cJSON_CreateObject();
         cJSON_AddStringToObject(json, "who", ID);
         cJSON_AddStringToObject(json, "message", message);
-        cJSON_AddStringToObject(json, "name", get_name_from_cjson(user));
-            puts("想看一下nmae, ID, who");
-            char* tem = cJSON_Print(json);
-            puts(tem);
-            free(tem);
+        cJSON_AddStringToObject(json, "tell", get_name_from_cjson(user));
         talk_DO_message(get_sock_from_cjson(user), DO, json);
+        printf("name is %s, sock = %d\n", get_name_from_cjson(user), get_sock_from_cjson(user));
         cJSON_Delete(json);
     }
 }
@@ -294,13 +314,13 @@ void forward_message( int sock, int wrt_fd, int read_fd)
 {
     int DO;
     cJSON* x;
-    puts("收到转发消息：");
+    if(PUT_OK) puts("收到转发消息：");
     read_DO_message(sock, &DO, &x);
-    puts("转发给子进程：");
+    if(PUT_OK) puts("转发给子进程：");
     talk_DO_message(wrt_fd, DO, x);
 
-    puts("接收子进程的消息");
+    if(PUT_OK) puts("接收子进程的消息");
     read_DO_message(read_fd, &DO, &x);
-    puts("发回给客户端：");
+    if(PUT_OK) puts("发回给客户端：");
     talk_DO_message(sock, DO, x);
 }

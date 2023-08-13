@@ -16,7 +16,7 @@
 #include "mycjson.h"
 
 #define CHAR_SIZE 20
-#define PUT_OK 1
+#define PUT_OK 0
 
 #define USER_MANAGE_FIRE "./data/sys/USER_manage"
 

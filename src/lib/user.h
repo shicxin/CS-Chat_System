@@ -24,6 +24,8 @@ int git_cjson_sock();
 cJSON* find_user_all(cJSON* , cJSON* );
 SOCKNOTE* find_user_online(SOCKNOTE* head, cJSON* user);
 void write_user_file_list(cJSON*, cJSON*);
+
+void ADD_other_tell_obj(cJSON* user, cJSON* head, cJSON* tmp);
 // git_cjson_();
 
 /*

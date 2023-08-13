@@ -29,7 +29,7 @@ void manage_user(int red_fd, int wrt_fd);
 void Client_functionality (int, int, int);
 bool Login_registered(int, int, int);
 
-bool log_or_reg(cJSON* , int);//客户端登录注册
+bool log_or_reg(cJSON** , int);//客户端登录注册
 
 // void talk_who(cJSON* user, int wrt_fd, int read_fd);
 // void lis_ser(cJSON* user, int wrt_fd, int read_fd);
