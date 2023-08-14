@@ -125,9 +125,156 @@ cs架构的聊天系统需要实现以下基本功能：
 
 1.   `json`对象的使用
 
+     `josn`对象可以十分方便的通过键值对进行操作（“key”: value）
+
+     `josn`对象通过转换为字符串进行消息发送、读写文件
+
 2.   多进程管理同一用户链表
 
-3.   进程之间文件描述符的发送与接收
+     可以单独开一个进程用于管理用户链表
+
+3.   进程之间文件描述符的发送与接收（必须使用unix域socket）
+
+     由于每个客户端与服务器建立socket连接时，服务器会单独为其创建一个进程并在进程中创建一个套接字，所以之前创建的进程中没有套接字的相关信息。
+
+     解决方案
+
+     由于套接字的本质是文件描述符，而文件描述符不仅仅是一个`int`，它通常在PCB中储存着一些信息。
+
+     假设我们创建两个子进程，按照创建顺序分别叫做进程一与进程二。在进程二中创建一个文件描述符，那么我们在进程一中无法使用这个文件描述符；这时候我们可以使用数据结构`msghdr`保存我们需要发送的文件描述符的信息；
+
+     ```c
+     #include<sys/socket.h>
+     struct msghdr  {
+     	//消息的协议地址  协议地址和套接口信息
+     	//在非连接的UDP中，发送者要指定对方地址端口，接受方用于的到数据来源，如果不需要的话可以设置为NULL
+     	//（在TCP或者连接的UDP中，一般设置为NULL）
+         void* msg_name ;   
+         /*  地址的长度  */
+         socklen_t msg_namelen ;    
+         /*  多io缓冲区的地址  */ 
+         struct iovec  * msg_iov ;   
+         /*  缓冲区的个数  */ 
+          int  msg_iovlen ;   
+          /*  辅助数据的地址  */ 
+         void  * msg_control ; 
+         /*  辅助数据的长度  */   
+         socklen_t msg_controllen ;
+          /*  接收消息的标识  */    
+          int  msg_flags ;  
+     } ;
+     ```
+
+     ```c
+     #include <sys/socket.h>
+     #include <fcntl.h>
+     #include <stdio.h>
+     #include <unistd.h>
+     #include <stdlib.h>
+     #include <assert.h>
+     #include <string.h>
+     
+     static const int CONTROL_LEN = CMSG_LEN( sizeof(int) );
+     
+     void send_fd( int fd, int fd_to_send )
+     {
+         struct iovec iov[1];
+         struct msghdr msg;
+         char buf[0];
+     
+         iov[0].iov_base = buf;
+         iov[0].iov_len = 1;
+         msg.msg_name    = NULL;
+         msg.msg_namelen = 0;
+         msg.msg_iov     = iov;
+         msg.msg_iovlen = 1;
+     
+         cmsghdr cm;
+         cm.cmsg_len = CONTROL_LEN;
+         cm.cmsg_level = SOL_SOCKET;
+         cm.cmsg_type = SCM_RIGHTS;
+         *(int *)CMSG_DATA( &cm ) = fd_to_send;
+         msg.msg_control = &cm;
+         msg.msg_controllen = CONTROL_LEN;
+     
+         sendmsg( fd, &msg, 0 );
+     }
+     
+     int recv_fd( int fd )
+     {
+         struct iovec iov[1];
+         struct msghdr msg;
+         char buf[0];
+     
+         iov[0].iov_base = buf;
+         iov[0].iov_len = 1;
+         msg.msg_name    = NULL;
+         msg.msg_namelen = 0;
+         msg.msg_iov     = iov;
+         msg.msg_iovlen = 1;
+     
+         cmsghdr cm;
+         msg.msg_control = &cm;
+         msg.msg_controllen = CONTROL_LEN;
+     
+         recvmsg( fd, &msg, 0 );
+     
+         int fd_to_read = *(int *)CMSG_DATA( &cm );
+         return fd_to_read;
+     }
+     
+     int main()
+     {
+         int pipefd[2];
+         int fd_to_pass = 0;
+     
+         int ret = socketpair( PF_UNIX, SOCK_DGRAM, 0, pipefd );
+         assert( ret != -1 );
+     
+         pid_t pid = fork();
+         assert( pid >= 0 );
+     
+         if ( pid == 0 )
+         {
+             close( pipefd[0] );
+             fd_to_pass = open( "test.txt", O_RDWR, 0666 );
+             send_fd( pipefd[1], ( fd_to_pass > 0 ) ? fd_to_pass : 0 );
+             close( fd_to_pass );
+             exit( 0 );
+         }
+     
+         close( pipefd[1] );
+         fd_to_pass = recv_fd( pipefd[0] );
+         char buf[1024];
+         memset( buf, '\0', 1024 );
+         read( fd_to_pass, buf, 1024 );
+         printf( "I got fd %d and data %s\n", fd_to_pass, buf );
+         close( fd_to_pass );
+     }
+     ```
+
+     
+
+4.   bind() error!
+
+     ```mermaid
+     sequenceDiagram
+     	主机A->>主机B: FIN <br/> SEQ: 5000<br/> ACK: ----
+     	主机B->>主机A: ACK <br/> SEQ: 7500<br/> ASK: 5001
+     	主机B->>主机A: FIN <br/> SEQ: 7501<br/> ASK: 5001
+     	主机A->>主机B: ASK <br/> SEQ: 5001<br/> ASK: 7502
+         activate 主机A
+         Note left of 主机A: time_wait
+     	deactivate 主机A
+     ```
+
+     解决方法：通过套接字可选项将TIME_wait套接字分配给一个监听新端口的套接字避免这个问题。
+
+5.   客户端的分割IO程序
+
+     客户端中通过fork复制套接字实现IO分割，好处是简化程序。
+
+     在子进程中只接收套接字收到的消息，父进程中只发送消息，可以有效避免因为read与write函数造成的阻塞导致不能及时接收消息或发消息。
 
      
 
