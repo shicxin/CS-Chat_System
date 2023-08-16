@@ -21,9 +21,9 @@ int main()
 	}
 	puts("进入系统！"); 
 	cJSON_AddNumberToObject(user, "sock", sock);
-	char* temp = cJSON_Print(user);
-	puts(temp);
-	free(temp);
+	// char* temp = cJSON_Print(user);
+	// puts(temp);
+	// free(temp);
 	puts("你不在线时收到的消息：");
 	put_other_tell_from_cjson(user);
 	int pid;

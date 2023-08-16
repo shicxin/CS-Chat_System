@@ -17,7 +17,6 @@ int main()
 {
     init_ser_file();//初始化文件夹
     int wrt_fd[2], red_fd[2];
-    // puts("?????????");
     socketpair( PF_UNIX, SOCK_DGRAM, 0, wrt_fd);
     socketpair( PF_UNIX, SOCK_DGRAM, 0, red_fd);
     puts("初始化文件夹成功");

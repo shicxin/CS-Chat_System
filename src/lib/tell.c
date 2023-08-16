@@ -75,9 +75,7 @@ int call_ser()
 void talk_DO_message(int fd, int DO, cJSON* message)
 {
     char* temp = cJSON_Print(message);
-    // puts(temp);
     char* header = make_cjson_header(DO, strlen(temp));
-    // puts(header);
     write(fd, header, HEADER_SIZE);
     write(fd, temp, strlen(temp));
     if(PUT_OK) puts(header);
@@ -100,7 +98,7 @@ void read_DO_message(int fd, int* DO, cJSON** message)
     *DO = get_DO_from_cjson(x);
     // free(message);
     char* temp = (char*)malloc(sizeof(char) * get_len_from_cjson(x));
-    read(fd, temp, get_len_from_cjson(x));
+    if(read(fd, temp, get_len_from_cjson(x)) == 0) exit(0);
     if(PUT_OK) puts(header);
     if(PUT_OK) puts(temp);
     if(PUT_OK) puts("");

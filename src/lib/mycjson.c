@@ -146,7 +146,8 @@ void put_other_tell_from_cjson(cJSON* obj)
     }
 }
 
-
+/// @brief 写入消息
+/// @param obj 消息对象
 void ADD_other_tell_from_cjson(cJSON* obj, cJSON* message)
 {
     cJSON* mes = cJSON_GetObjectItem(obj, "other_tell");
