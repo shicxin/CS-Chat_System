@@ -3,6 +3,8 @@
 ├── build           $运行CMake生成的编译信息$
 ├── Doc             $从项目创建开始全部的文档，包括环境搭建、程序编译运行$
 ├── example         $样例，应该是一直为空的$
+├── history         $之前使用C语言编写的简易聊天服务器与客户端$
+
 ├── include         $头文件$
 │   ├── client
 │   └── server
@@ -16,4 +18,5 @@
     ├── JSON for Modern C++ $一个轻量级的C++JSON库$
     └── muduo               $muduo网络库$
 
+50 directories
 tree -d > ./Doc/LookTreeBegin.txt

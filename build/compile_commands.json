@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/md/dev/CPP-chat/build/src/server",
-  "command": "/usr/bin/g++  -I/home/md/dev/CPP-chat/include -I/home/md/dev/CPP-chat/include/server -I/home/md/dev/CPP-chat/include/client -g -g -o CMakeFiles/ChatServer.dir/main.cpp.o -c /home/md/dev/CPP-chat/src/server/main.cpp",
-  "file": "/home/md/dev/CPP-chat/src/server/main.cpp"
-}
-]
