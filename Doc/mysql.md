@@ -1,31 +1,23 @@
-ubuntu环境安装mysql-server和mysql开发包，包括mysql头文件和动态库文件，命令如下：
+在Ubuntu环境中安装MySQL Server和MySQL开发包。
 
+1. 安装MySQL Server和MySQL开发包
+   ```bash
+   sudo apt update
+   sudo apt install mysql-server libmysqlclient-dev
+   ```
 
-```shell
-sudo apt-get install mysql-server 
-sudo apt-get install libmysqlclient-dev =》 安装开发包
-```
+2. 安装过程中会提示设置root用户的密码，输入并确认密码。
 
-ubuntu默认安装最新的mysql，但是初始的用户名和密码是自动生成的，按下面步骤修改mysql的root用户密码为123456
+3. 修改MySQL密码为123456
+   - 以root用户身份登录MySQL
+     ```bash
+     sudo mysql -u root -p
+     ```
+   - 输入之前设置的root密码
+   - 修改root用户的密码为123456
+     ```sql
+     ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+     FLUSH PRIVILEGES;
+     ```
 
-【step 1】tony@tony-virtual-machine:~$ sudo cat /etc/mysql/debian.cnf
- host = localhost
- user = debian-sys-maint        《==============  初始的用户名
- password = Kk3TbShbFNvjvhpM   《==============  初始的密码
- 【step 2】用上面初始的用户名和密码，登录mysql server，修改root用户的密码，命令如下：
- 
-```shell
- tony@tony-virtual-machine:~$ mysql -u debian-sys-maint -pKk3TbShbFNvjvhpM 
-```
-命令解释： -u后面是上面查看的用户名 -p后面紧跟上面查看的密码
-
-```shell
-mysql> update mysql.user set authentication_string=password('123456') where user='root' and host='localhost';
-mysql> update mysql.user set plugin="mysql_native_password";
-mysql> flush privileges;
-Query OK, 0 rows affected (0.01 sec)
-mysql> exit
-Bye
-```
-
-创建相关数据库以及设置编码
+通过以上步骤，你就可以在Ubuntu环境中安装MySQL Server和MySQL开发包，并将MySQL密码修改为123456了。
