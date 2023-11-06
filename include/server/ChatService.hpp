@@ -9,13 +9,12 @@
 #include <muduo/net/TcpConnection.h>
 #include <muduo/net/TcpServer.h>
 
-#include <public.hpp>
-
 using namespace std;
 using namespace muduo;
 using namespace muduo::net;
 using json = nlohmann::json;
 
+/// @brief 处理消息的事件回调方法类型
 using MsgHandler = 
         std::function<void(const TcpConnectionPtr &conn, json &js, Timestamp time)>;
 
@@ -42,6 +41,7 @@ public:
     /// @param time 收到消息的时间
     void login(const TcpConnectionPtr &conn, json &js, Timestamp time);
     
+    MsgHandler GetHandler(int MsgId); 
 };
 
 #endif // CHATSERVICE_H
