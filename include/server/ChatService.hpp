@@ -3,11 +3,10 @@
 
 #include <unordered_map>
 #include <functional>
-
 #include <json.hpp>
-
 #include <muduo/net/TcpConnection.h>
 #include <muduo/net/TcpServer.h>
+#include "usermodel.hpp"
 
 using namespace std;
 using namespace muduo;
@@ -22,6 +21,8 @@ using MsgHandler =
 class ChatService {
     /// @brief  map映射表，存储消息ID和其对应的业务处理函数
     unordered_map<int, MsgHandler> _MsgHandlerMap;
+    /// @brief 数据操作类对象
+    UserModel _userModel;
     //封装为单例的构造函数
     ChatService();
 public:
