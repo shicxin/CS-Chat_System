@@ -77,6 +77,9 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time) 
         // 更新用户状态
         user.SetState("online");
         _userModel.updataState(user);
+        // 记录已登录用户连接
+        lock_guard<mutex> lock(_connMutex);
+        _UserConnMap.insert({id, conn});
     } else { // 登录失败
         user.SetName("密码错误");
         LOG_ERROR << "用户" << user.GetId() << ": " << user.GetName() << "登录失败" << "\n";

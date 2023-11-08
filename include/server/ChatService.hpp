@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <functional>
+#include <mutex>
 #include <json.hpp>
 #include <muduo/net/TcpConnection.h>
 #include <muduo/net/TcpServer.h>
@@ -21,6 +22,10 @@ using MsgHandler =
 class ChatService {
     /// @brief  map映射表，存储消息ID和其对应的业务处理函数
     unordered_map<int, MsgHandler> _MsgHandlerMap;
+    /// @brief 记录用户连接信息
+    unordered_map<int, TcpConnectionPtr> _UserConnMap;
+    /// @brief 定义互斥锁保证_UserConnMap的线程安全
+    mutex _connMutex;
     /// @brief 数据操作类对象
     UserModel _userModel;
     //封装为单例的构造函数
