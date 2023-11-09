@@ -16,7 +16,7 @@ ChatService::ChatService() {
     _MsgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
 }
 
- ChatService& ChatService::instance() {
+ChatService& ChatService::instance() {
     static ChatService service;
     return service;
 }
@@ -87,5 +87,32 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time) 
         response["msageid"] = LOGIN_MSG_ACK;
         response["errno"] = 1;
         conn->send(response.dump());
+    }
+}
+
+void ChatService::clientCloseException(const TcpConnectionPtr &conn) {
+    User user;
+    user.SetId(0);
+    { // 该作用域加锁
+        lock_guard<mutex> lock(_connMutex);
+        // _UserConnMap.erase_if(conn {
+        //     return p.second == conn; // 删除条件
+        // });
+        // 注释方法同下，但是需要C++20特性
+        for(auto it = _UserConnMap.begin(); it != _UserConnMap.end(); ) {
+            if(it->second == conn) {
+                user.SetId(it->first);
+                // 删除用户的连接信息
+                it = _UserConnMap.erase(it); // 更新迭代器
+                break;
+            } else {
+                ++it; // 增加迭代器
+            }
+        }
+    }
+    // 修改数据库中用户的状态
+    if(user.GetId()) {
+        user.SetState("offline");
+        _userModel.updataState(user);
     }
 }

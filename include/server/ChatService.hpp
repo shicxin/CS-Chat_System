@@ -47,7 +47,14 @@ public:
     /// @param time 收到消息的时间
     void login(const TcpConnectionPtr &conn, json &js, Timestamp time);
     
+    /// @brief 获取消息对应的处理器
+    /// @param MsgId 
+    /// @return 
     MsgHandler GetHandler(int MsgId); 
+
+    /// @brief 客户端异常退出
+    /// @param conn 客户端连接
+    void clientCloseException(const TcpConnectionPtr &conn);
 };
 
 #endif // CHATSERVICE_H
