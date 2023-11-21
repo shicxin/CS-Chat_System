@@ -20,6 +20,9 @@ public:
     /// @param id 查找用户ID
     /// @return 查到返回user结构体，，没查到将返回结构体id置为-1
     User query(int id);
+
+    /// @brief 服务器启动或异常退出时重置用户状态信息
+    void resetState();
 };
 
 #endif

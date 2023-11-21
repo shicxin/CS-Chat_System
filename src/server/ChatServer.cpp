@@ -35,9 +35,8 @@ void ChatServer::onMessage(const TcpConnectionPtr& conn, Buffer* buffer, Timesta
   js = json::parse(buf);
   } catch (json::parse_error& e)
   {
-    return ; // 暂时不做处理
       // 输出异常信息
-      // << "Parse error: " << e.what() << "\n";
+    return ; // 暂时不做处理
   }
   // 获取消息对应的消息处理器
   if(!js.contains("msgid")) return ;

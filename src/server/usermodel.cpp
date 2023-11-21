@@ -56,3 +56,12 @@ User UserModel::query(int id) {
     }
     return user;
 }
+
+void UserModel::resetState() {
+    string SQL = "UPDATE user SET state = 'offline' WHERE state = 'online';";
+
+    MySQL mysql;
+    if(mysql.connect()) {
+        mysql.update(SQL);
+    }
+}

@@ -1,0 +1,24 @@
+// 注册
+{"msgid":3,"name":"lisi","password":"123123"}
+// 登录
+{"msgid":1,"id":13,"password":"123456"}
+
+{"msgid":1,"id":15,"password":"666666"}
+
+// 一对一聊天
+{"msgid":5,"id":13,"name":"zhangsan","toid":15,"msg":"Hello!"}
+{"msgid":5,"id":15,"name":"zhangsan","toid":13,"msg":"Hello too!"}
+
+// 离线消息
+
+{"msgid":5,"id":13,"name":"zhangsan","toid":16,"msg":"Hello liu shuo!"}
+
+select user.id,user.name,user.state from user inner join friend on friend.friendid = user.id where friend.userid = 13;
+
+
+msgid
+id
+name
+password
+toid
+msg
