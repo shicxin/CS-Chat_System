@@ -14,12 +14,18 @@ void reseHandler(int) {
     exit(0);
 }
 
-int main() {
+int main(int argc, char** argv) {
+
+    if(argc != 3) {
+        cout << "please use " << argv[0] << " like " << argv[0] << " xx.xx.xx.xx port\n";
+    }
 
     signal(SIGINT, reseHandler);
 
     EventLoop loop;
-    InetAddress addr("127.0.0.1", 6000);
+    char *ip = argv[1];
+    uint16_t port = atoi(argv[2]);
+    InetAddress addr(ip, port);
     ChatServer server(&loop, addr, "CharServer");
     server.start();
     loop.loop();

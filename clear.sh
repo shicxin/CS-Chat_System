@@ -1,3 +1,2 @@
 cd build
-
 rm -rf *
