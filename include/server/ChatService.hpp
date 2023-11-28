@@ -14,6 +14,8 @@
 #include "friendmodel.hpp"
 #include "groupmodel.hpp"
 
+#include <redis.hpp>
+
 using namespace std;
 using namespace muduo;
 using namespace muduo::net;
@@ -46,6 +48,8 @@ class ChatService {
 
     /// @brief 群组消息处理对象
     GroupModel _groupModel;
+
+    Redis _redis;
 
     //封装为单例的构造函数
     ChatService();
@@ -113,6 +117,11 @@ public:
     /// @param js JSON消息
     /// @param time 收到消息的时间
     void groupChat(const TcpConnectionPtr &conn, json &js, Timestamp time);
+
+    /// @brief 从redis消息队列中获取订阅的消息
+    /// @param userid 
+    /// @param msg 
+    void handleRedisSubscribeMessage(int userid, string msg);
 };
 
 #endif // CHATSERVICE_H
