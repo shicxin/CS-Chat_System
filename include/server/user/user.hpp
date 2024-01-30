@@ -17,10 +17,10 @@ public:
     void SetPswd(string pswd) {password_ = pswd;}
     void SetState(string state) {state_ = state;}
 
-    int GetId() { return id_; }
-    string GetName() { return name_; }
-    string GetPswd() { return password_; }
-    string GetState() { return state_; }
+    int GetId() const { return id_; }
+    string GetName() const { return name_; }
+    string GetPswd() const { return password_; }
+    string GetState() const { return state_; }
 };
 
 #endif // USER_H
